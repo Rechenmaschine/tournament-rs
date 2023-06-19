@@ -13,9 +13,9 @@ use anyhow::Error;
 type PlayerId = usize;
 
 pub trait MatchResult {
-    fn player1_win(&self) -> bool;
-    fn player2_win(&self) -> bool;
-    fn is_draw(&self) -> bool;
+    fn winner(&self) -> Option<PlayerId>;
+    fn loser(&self) -> Option<PlayerId>;
+    fn is_draw(&self) -> Option<(PlayerId, PlayerId)>;
 }
 
 pub trait Match: Sized {

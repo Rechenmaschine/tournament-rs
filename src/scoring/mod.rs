@@ -1,4 +1,4 @@
-use crate::{Match, PlayerId, ScoringSystem};
+use crate::{Match, MatchResult, PlayerId, ScoringSystem};
 use std::collections::HashMap;
 use std::marker::PhantomData;
 
@@ -25,5 +25,7 @@ where
 }
 
 impl<M: Match> ScoringSystem<M> for DefaultScoring<M> {
-    fn report(&mut self, match_result: M::MatchResult) {}
+    fn report(&mut self, match_result: M::MatchResult) {
+
+    }
 }
