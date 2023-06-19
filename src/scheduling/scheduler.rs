@@ -1,4 +1,5 @@
 use crate::PlayerId;
+use anyhow::Error;
 
 /// A scheduler is responsible for pairing players for a match.
 pub trait Scheduler {
@@ -17,6 +18,10 @@ pub trait Scheduler {
     /// to complete in order to determine the next pairing.
     ///
     fn get(&mut self) -> Option<(PlayerId, PlayerId)>;
+
+    /// A nonblocking counterpart of `get()` that returns an `Error`, if
+    /// the function were to block.
+    fn try_get(&mut self) -> Result<Option<(PlayerId, PlayerId)>, Error>;
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -32,3 +37,7 @@ pub trait Scheduler {
 ///
 /// Note however, that this scheduler does not necessarily guarantee the *best* assignment.
 pub trait PlayerBalancing {}
+
+pub trait Blocking {}
+
+pub trait NonBlocking {}

@@ -3,42 +3,49 @@
 use crate::{Match, PlayerId};
 use anyhow::{anyhow, Error};
 use std::collections::HashMap;
-use std::hash::{Hash, Hasher};
 
-#[derive(Clone)]
-pub struct Player<A: Clone> {
-    pub(crate) id: PlayerId,
-    pub(crate) agent: A,
+pub struct Player<M: Match> {
+    pub(crate) agent: M::Agent,
+    pub(crate) name: &'static str,
 }
 
-impl<A: Clone> PartialEq for Player<A> {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
+impl<M: Match> Clone for Player<M> {
+    fn clone(&self) -> Self {
+        Player {
+            agent: self.agent.clone(),
+            name: self.name,
+        }
     }
 }
 
-impl<A: Clone> Hash for Player<A> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
+impl<M: Match> Player<M> {
+
+    fn new(agent: M::Agent) -> Self {
+        Player {
+            agent,
+            name: std::any::type_name::<M::Agent>()
+        }
+    }
+
+    fn with_name(self, name: &'static str) -> Self {
+        Player { name, ..self }
     }
 }
 
 pub struct PlayerRepository<M: Match> {
-    players: HashMap<PlayerId, Player<M::Agent>>,
+    players: HashMap<PlayerId, Player<M>>,
 }
 
+// TODO improve ID generation
 impl<M: Match> PlayerRepository<M> {
-    // TODO: use a better id generation
-    //  pass vec<player> instead of vec<agent>
-    pub fn new(players: Vec<M::Agent>) -> Self {
+    /// Creates a new PlayerRepository with the given players.
+    pub fn new_with_players(players: Vec<Player<M>>) -> Self {
         let mut players_map = HashMap::new();
 
-        for (id, agent) in players.into_iter().enumerate() {
-            let player = Player {
-                id: id as PlayerId,
-                agent,
-            };
+        let mut id = 1;
+        for player in players.into_iter() {
             players_map.insert(id, player);
+            id += 1;
         }
 
         PlayerRepository {
@@ -46,11 +53,29 @@ impl<M: Match> PlayerRepository<M> {
         }
     }
 
+    /// Creates an empty PlayerRepository.
+    pub fn new() -> Self {
+        PlayerRepository {
+            players: HashMap::new(),
+        }
+    }
+
+    pub fn add(&mut self, player: Player<M>) {
+        let id = self.players.len() as PlayerId + 1;
+        self.players.insert(id, player);
+    }
+
+    pub fn players(&self) -> Vec<Player<M>> {
+        self.players.values()
+            .cloned()
+            .collect::<Vec<_>>()
+    }
+
     pub fn ids(&self) -> Vec<PlayerId> {
         self.players.keys().cloned().collect()
     }
 
-    pub fn get(&self, id: PlayerId) -> Result<Player<M::Agent>, Error> {
+    pub fn get(&self, id: PlayerId) -> Result<Player<M>, Error> {
         self.players
             .get(&id)
             .cloned()

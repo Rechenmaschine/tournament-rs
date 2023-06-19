@@ -10,3 +10,8 @@ ndarray = "0.15.6"
 rand = "0.8.5"
 anyhow = "1.0.71"
 spmc = "0.3.0"
+threadpool = "1.8.1"
+
+[dev-dependencies]
+# github link: https://github.com/Rechenmaschine/glasswing.git
+glasswing = { git = "https://github.com/Rechenmaschine/glasswing.git" }

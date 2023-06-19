@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-mod executor;
 mod player_repository;
 mod ranking;
 mod scheduling;
@@ -9,6 +8,7 @@ mod tournaments;
 
 use crate::player_repository::Player;
 use anyhow::Error;
+use std::fmt::Debug;
 
 type PlayerId = usize;
 
@@ -24,13 +24,13 @@ pub trait Match: Sized {
     type Agent: Clone + Sized + Send + Sync;
 
     /// The outcome of a match.
-    type MatchResult: MatchResult + Send;
+    type MatchResult: MatchResult + Send + Debug;
 
     /// Create a new match between two agents.
     ///
     /// Agents are cloned before each match, and can therefore be consumed by this function.
     /// By convention, the first player should always start the game.
-    fn new(player1: Player<Self::Agent>, player2: Player<Self::Agent>) -> Self;
+    fn new(player1: Player<Self>, player2: Player<Self>) -> Self;
 
     /// Play the match and return the result.
     /// If the match cannot be played, return an error.
@@ -45,27 +45,4 @@ pub trait ScoringSystem<M: Match> {
 pub trait RankingPolicy {
     /// Returns the current ranking of players based on the scores table.
     fn rank_players(&mut self) -> Vec<PlayerId>;
-}
-
-//tests
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    use crate::player_repository::PlayerRepository;
-    use crate::scheduling::RoundRobbinScheduler;
-    use crate::scoring::DefaultScoring;
-    use tournaments::Tournament;
-
-    #[test]
-    fn main() {
-        let players = PlayerRepository::new(vec![]);
-
-        let tourament = Tournament::new(
-            RoundRobbinScheduler::new(players.ids()),
-            DefaultScoring::new(players.ids()),
-            players,
-        )
-        .with_threads(12);
-    }
 }

@@ -120,6 +120,11 @@ impl Scheduler for RoundRobbinScheduler {
             Some(self.pairs.as_mut().unwrap().pop().unwrap())
         }
     }
+
+    fn try_get(&mut self) -> Result<Option<(PlayerId, PlayerId)>, Error> {
+        // Round robbin scheduler never blocks
+        Ok(self.get())
+    }
 }
 
 impl Iterator for RoundRobbinScheduler {
@@ -139,11 +144,10 @@ impl Iterator for RoundRobbinScheduler {
 // characteristics of round robbin
 impl PlayerBalancing for RoundRobbinScheduler {}
 
-
 #[cfg(test)]
 mod tests {
-    use std::collections::{HashMap, HashSet};
     use super::*;
+    use std::collections::{HashMap, HashSet};
 
     #[test]
     fn test_even() {
@@ -154,13 +158,26 @@ mod tests {
 
         let pairs: Vec<_> = round_robin.collect();
         println!("{:?}", pairs);
-        assert_eq!(pairs.len(), n * (n - 1) / 2, "n*(n-1)/2 pairs expected. Got {}", pairs.len());
+        assert_eq!(
+            pairs.len(),
+            n * (n - 1) / 2,
+            "n*(n-1)/2 pairs expected. Got {}",
+            pairs.len()
+        );
 
         // check that all pairs are distinct using a hashset
         let mut set = HashSet::new();
         for (p1, p2) in pairs.clone() {
-            assert!(set.insert((p1, p2)), "Duplicate pair {:?} generated", (p1, p2));
-            assert!(set.insert((p2, p1)), "Duplicate pair {:?} generated", (p2, p1));
+            assert!(
+                set.insert((p1, p2)),
+                "Duplicate pair {:?} generated",
+                (p1, p2)
+            );
+            assert!(
+                set.insert((p2, p1)),
+                "Duplicate pair {:?} generated",
+                (p2, p1)
+            );
         }
 
         // make sure that each player plays each side about the same number of times
@@ -172,7 +189,11 @@ mod tests {
         let count: Vec<i32> = count.into_iter().map(|(_, c)| c).collect();
         println!("{:?}", count);
         for c in &count {
-            assert!((*c).abs() <= 1, "Each player should play each side about the same number of times. Got {:?}", count);
+            assert!(
+                (*c).abs() <= 1,
+                "Each player should play each side about the same number of times. Got {:?}",
+                count
+            );
         }
     }
 }
