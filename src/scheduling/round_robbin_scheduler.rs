@@ -138,3 +138,41 @@ impl Iterator for RoundRobbinScheduler {
 
 // characteristics of round robbin
 impl PlayerBalancing for RoundRobbinScheduler {}
+
+
+#[cfg(test)]
+mod tests {
+    use std::collections::{HashMap, HashSet};
+    use super::*;
+
+    #[test]
+    fn test_even() {
+        let players = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        let n = players.len();
+        let mut round_robin = RoundRobbinScheduler::new(players).with_r(1).unwrap();
+        round_robin.init();
+
+        let pairs: Vec<_> = round_robin.collect();
+        println!("{:?}", pairs);
+        assert_eq!(pairs.len(), n * (n - 1) / 2, "n*(n-1)/2 pairs expected. Got {}", pairs.len());
+
+        // check that all pairs are distinct using a hashset
+        let mut set = HashSet::new();
+        for (p1, p2) in pairs.clone() {
+            assert!(set.insert((p1, p2)), "Duplicate pair {:?} generated", (p1, p2));
+            assert!(set.insert((p2, p1)), "Duplicate pair {:?} generated", (p2, p1));
+        }
+
+        // make sure that each player plays each side about the same number of times
+        let mut count = HashMap::<_, i32>::new();
+        for (p1, p2) in pairs.clone() {
+            *count.entry(p1).or_insert(0) += 1;
+            *count.entry(p2).or_insert(0) -= 1;
+        }
+        let count: Vec<i32> = count.into_iter().map(|(_, c)| c).collect();
+        println!("{:?}", count);
+        for c in &count {
+            assert!((*c).abs() <= 1, "Each player should play each side about the same number of times. Got {:?}", count);
+        }
+    }
+}
