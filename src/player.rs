@@ -1,8 +1,10 @@
 // A Player repository maps PlayerIDs to their respective Agent.
 
-use crate::{Match, PlayerId};
 use anyhow::{anyhow, Error};
 use std::collections::HashMap;
+use crate::game::Match;
+
+pub type PlayerId = usize;
 
 pub struct Player<M: Match> {
     pub(crate) agent: M::Agent,
@@ -19,11 +21,10 @@ impl<M: Match> Clone for Player<M> {
 }
 
 impl<M: Match> Player<M> {
-
     fn new(agent: M::Agent) -> Self {
         Player {
             agent,
-            name: std::any::type_name::<M::Agent>()
+            name: std::any::type_name::<M::Agent>(),
         }
     }
 
@@ -66,9 +67,7 @@ impl<M: Match> PlayerRepository<M> {
     }
 
     pub fn players(&self) -> Vec<Player<M>> {
-        self.players.values()
-            .cloned()
-            .collect::<Vec<_>>()
+        self.players.values().cloned().collect::<Vec<_>>()
     }
 
     pub fn ids(&self) -> Vec<PlayerId> {

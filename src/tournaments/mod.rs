@@ -1,9 +1,10 @@
-use crate::player_repository::PlayerRepository;
+use crate::player::PlayerRepository;
 use crate::scheduling::Scheduler;
-use crate::{Match, ScoringSystem};
 use anyhow::Error;
 use std::sync::mpsc;
 use threadpool::ThreadPool;
+use crate::game::Match;
+use crate::scoring::ScoringSystem;
 
 pub struct Tournament<M, P, S /*C*/>
 where

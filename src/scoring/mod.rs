@@ -1,19 +1,21 @@
-use crate::{Match, MatchResult, PlayerId, ScoringSystem};
+use crate::game::{Match, MatchResult};
 use std::collections::HashMap;
+use crate::player::PlayerId;
 
-pub struct DefaultScoring
-{
+pub trait ScoringSystem<M: Match> {
+    /// Updates the scores table based on the result of a match.
+    fn report(&mut self, match_result: M::MatchResult);
+}
+
+pub struct DefaultScoring {
     player_scores: HashMap<PlayerId, i32>,
 }
 
-impl DefaultScoring
-where {
+impl DefaultScoring {
     pub fn new(players: Vec<PlayerId>) -> Self {
         let player_scores = players.into_iter().map(|player| (player, 0)).collect();
 
-        DefaultScoring {
-            player_scores,
-        }
+        DefaultScoring { player_scores }
     }
 }
 

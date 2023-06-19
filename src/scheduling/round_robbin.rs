@@ -3,9 +3,9 @@
 /*------------------------------------------------------------------------------------------------*/
 
 use crate::scheduling::{PlayerBalancing, Scheduler};
-use crate::PlayerId;
 use anyhow::{anyhow, Error};
 use std::collections::VecDeque;
+use crate::player::PlayerId;
 
 pub struct RoundRobbinScheduler {
     players: Vec<Option<PlayerId>>,
