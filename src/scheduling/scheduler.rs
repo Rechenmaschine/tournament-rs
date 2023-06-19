@@ -19,6 +19,10 @@ pub trait Scheduler {
     fn get(&mut self) -> Option<(PlayerId, PlayerId)>;
 }
 
+/*------------------------------------------------------------------------------------------------*/
+/*------------------------------------- Characteristics ------------------------------------------*/
+/*------------------------------------------------------------------------------------------------*/
+
 /// This trait marks a scheduler, that balances the number of times each agent plays as
 /// Player 1 and Player 2. It is ideal for games where one player is at a disadvantage.
 ///
@@ -27,4 +31,4 @@ pub trait Scheduler {
 /// |n1 - n2| ≤ 1
 ///
 /// Note however, that this scheduler does not necessarily guarantee the *best* assignment.
-trait PlayerBalancing {}
+pub trait PlayerBalancing {}

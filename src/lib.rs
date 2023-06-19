@@ -4,10 +4,11 @@ mod executor;
 mod player_repository;
 mod ranking;
 mod scheduling;
+mod scoring;
 mod tournaments;
 
-use anyhow::Error;
 use crate::player_repository::Player;
+use anyhow::Error;
 
 type PlayerId = usize;
 
@@ -36,7 +37,7 @@ pub trait Match: Sized {
     fn playout(&mut self) -> Result<Self::MatchResult, Error>;
 }
 
-pub trait ScoringPolicy<M: Match> {
+pub trait ScoringSystem<M: Match> {
     /// Updates the scores table based on the result of a match.
     fn report(&mut self, match_result: M::MatchResult);
 }
@@ -46,33 +47,25 @@ pub trait RankingPolicy {
     fn rank_players(&mut self) -> Vec<PlayerId>;
 }
 
-pub trait Tournament<M, P, S, R> {
-    fn start(&mut self);
-}
-
 //tests
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    use tournaments::Tournament;
     use crate::player_repository::PlayerRepository;
     use crate::scheduling::RoundRobbinScheduler;
+    use crate::scoring::DefaultScoring;
+    use tournaments::Tournament;
 
     #[test]
-    fn main(){
-
+    fn main() {
         let players = PlayerRepository::new(vec![]);
 
         let tourament = Tournament::new(
-            RoundRobbinScheduler::new(players),
-            (),
-            (),
-            ()
-        ).with_threads(12);
-
-
-
+            RoundRobbinScheduler::new(players.ids()),
+            DefaultScoring::new(players.ids()),
+            players,
+        )
+        .with_threads(12);
     }
-
 }
