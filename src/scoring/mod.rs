@@ -1,10 +1,10 @@
-use crate::game::{Match, MatchResult};
-use std::collections::HashMap;
+use crate::game::{LabelledOutcome, Match};
 use crate::player::PlayerId;
+use std::collections::HashMap;
 
 pub trait ScoringSystem<M: Match> {
     /// Updates the scores table based on the result of a match.
-    fn report(&mut self, match_result: M::MatchResult);
+    fn report(&mut self, outcome: &LabelledOutcome, match_result: &M::MatchResult);
 }
 
 pub struct DefaultScoring {
@@ -20,16 +20,21 @@ impl DefaultScoring {
 }
 
 impl<M: Match> ScoringSystem<M> for DefaultScoring {
-    fn report(&mut self, match_result: M::MatchResult) {
-        if let Some((p1, p2)) = match_result.is_draw() {
-            // If draw, then both players get 1 point
-            self.player_scores.entry(p1).and_modify(|score| *score += 1);
-            self.player_scores.entry(p2).and_modify(|score| *score += 1);
-        } else {
-            // winner gets 2 points, loser gets 0
-            self.player_scores
-                .entry(match_result.winner().unwrap())
-                .and_modify(|score| *score += 2);
+    fn report(&mut self, outcome: &LabelledOutcome, _: &M::MatchResult) {
+        match outcome {
+            LabelledOutcome::Win { winner, .. } => {
+                self.player_scores
+                    .entry(winner.id())
+                    .and_modify(|score| *score += 1);
+            }
+            LabelledOutcome::Draw(p1, p2) => {
+                self.player_scores
+                    .entry(p1.id())
+                    .and_modify(|score| *score += 1);
+                self.player_scores
+                    .entry(p2.id())
+                    .and_modify(|score| *score += 1);
+            }
         }
     }
 }

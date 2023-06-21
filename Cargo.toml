@@ -3,8 +3,6 @@ name = "tournament-rs"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 ndarray = "0.15.6"
 rand = "0.8.5"
@@ -13,5 +11,4 @@ spmc = "0.3.0"
 threadpool = "1.8.1"
 
 [dev-dependencies]
-# github link: https://github.com/Rechenmaschine/glasswing.git
-glasswing = { git = "https://github.com/Rechenmaschine/glasswing.git" }
+glasswing = {git = "https://github.com/Rechenmaschine/glasswing.git", features = ["tournaments", "serde_support"]}

@@ -1,17 +1,47 @@
-use std::fmt::Debug;
+use crate::player::{Player, PlayerData};
 use anyhow::Error;
-use crate::player::{Player, PlayerId};
+use std::fmt::Debug;
 
 pub trait MatchResult {
-    fn winner(&self) -> Option<PlayerId>;
-    fn loser(&self) -> Option<PlayerId>;
-    fn is_draw(&self) -> Option<(PlayerId, PlayerId)>;
+    fn outcome(&self) -> Outcome;
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Outcome {
+    WinP1,
+    WinP2,
+    Draw,
+}
+
+#[derive(Debug, Clone)]
+pub enum LabelledOutcome {
+    Win {
+        winner: PlayerData,
+        loser: PlayerData,
+    },
+    Draw(PlayerData, PlayerData),
+}
+
+impl LabelledOutcome {
+    pub fn new(outcome: Outcome, player1: PlayerData, player2: PlayerData) -> Self {
+        match outcome {
+            Outcome::WinP1 => LabelledOutcome::Win {
+                winner: player1,
+                loser: player2,
+            },
+            Outcome::WinP2 => LabelledOutcome::Win {
+                winner: player2,
+                loser: player1,
+            },
+            Outcome::Draw => LabelledOutcome::Draw(player1, player2),
+        }
+    }
 }
 
 pub trait Match: Sized {
     /// All agents must be of the same type. If this is not the case,
     /// then you can box a trait object.
-    type Agent: Clone + Sized + Send + Sync;
+    type Agent: Send;
 
     /// The outcome of a match.
     type MatchResult: MatchResult + Send + Debug;

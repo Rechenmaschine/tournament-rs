@@ -2,8 +2,8 @@ pub mod round_robbin;
 
 pub use round_robbin::*;
 
-use anyhow::Error;
 use crate::player::PlayerId;
+use anyhow::Error;
 
 /// A scheduler is responsible for pairing players for a match.
 pub trait Scheduler {
